@@ -103,7 +103,7 @@ func (cf *CloudflareManager) AddDNSRecord(zoneName, name, recordType, content st
 	}
 
 	// 创建DNS记录
-	record := cloudflare.DNSRecord{
+	params := cloudflare.CreateDNSRecordParams{
 		Type:    recordType,
 		Name:    name,
 		Content: content,
@@ -111,7 +111,7 @@ func (cf *CloudflareManager) AddDNSRecord(zoneName, name, recordType, content st
 		Proxied: &proxied,
 	}
 
-	_, err = cf.Client.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), record)
+	_, err = cf.Client.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), params)
 	if err != nil {
 		return fmt.Errorf("创建DNS记录失败: %w", err)
 	}
@@ -122,14 +122,6 @@ func (cf *CloudflareManager) AddDNSRecord(zoneName, name, recordType, content st
 // UpdateDNSRecord 更新DNS记录
 func (cf *CloudflareManager) UpdateDNSRecord(recordID, zoneID, name, recordType, content string, ttl int, proxied bool) error {
 	ctx := context.Background()
-
-	record := cloudflare.DNSRecord{
-		Type:    recordType,
-		Name:    name,
-		Content: content,
-		TTL:     ttl,
-		Proxied: &proxied,
-	}
 
 	_, err := cf.Client.UpdateDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), cloudflare.UpdateDNSRecordParams{
 		ID:      recordID,

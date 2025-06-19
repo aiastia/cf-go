@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -292,7 +290,7 @@ func (m *InteractiveModel) applyFiltersAndSort() {
 
 	// 应用筛选
 	if m.filter != "" {
-		filters := make(map[string]string)
+		// filters := make(map[string]string) // Remove unused variable
 		// 简单的关键词筛选
 		for _, record := range m.records {
 			if strings.Contains(strings.ToLower(record.Name), strings.ToLower(m.filter)) ||
