@@ -1,0 +1,25 @@
+# 编译输出
+cf-dns-manager
+cf-dns-manager.exe
+*.exe
+
+# 配置文件（包含敏感信息）
+config.yaml
+
+# Go 相关
+go.sum
+*.test
+*.out
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log 

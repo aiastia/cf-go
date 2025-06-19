@@ -1,0 +1,10 @@
+# Cloudflare DNS 管理器配置文件
+# 复制此文件为 config.yaml 并填入你的配置
+
+# Cloudflare API Token (必需)
+# 获取方法: https://dash.cloudflare.com/profile/api-tokens
+cloudflare_token: "your_cloudflare_api_token_here"
+
+# Cloudflare Account ID (可选)
+# 如果为空，将使用默认账户
+account_id: "your_account_id_here" 
