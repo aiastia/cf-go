@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -11,7 +13,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "列出所有DNS记录",
-	Long:  `列出所有域名的DNS记录，支持排序和筛选`,
+	Long:  `列出所有域名的DNS记录，支持排序和筛选，可导出为CSV表格`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cf, err := NewCloudflareManager()
 		if err != nil {
@@ -53,6 +55,18 @@ var listCmd = &cobra.Command{
 		sortBy, _ := cmd.Flags().GetString("sort-by")
 		ascending, _ := cmd.Flags().GetBool("ascending")
 		SortRecords(records, sortBy, ascending)
+
+		// 检查是否有输出文件参数
+		outputFile, _ := cmd.Flags().GetString("output")
+		if outputFile != "" {
+			err := writeRecordsToCSV(records, outputFile)
+			if err != nil {
+				fmt.Printf("写入CSV文件失败: %v\n", err)
+				return
+			}
+			fmt.Printf("已导出 %d 条DNS记录到 %s\n", len(records), outputFile)
+			return
+		}
 
 		// 显示记录
 		displayRecords(records)
@@ -202,6 +216,7 @@ func init() {
 	listCmd.Flags().String("filter-content", "", "按内容筛选")
 	listCmd.Flags().String("sort-by", "zone", "排序字段 (name, type, zone, content, ttl, created, modified)")
 	listCmd.Flags().Bool("ascending", true, "升序排序")
+	listCmd.Flags().String("output", "", "将结果导出为CSV文件")
 
 	// add命令的标志
 	addCmd.Flags().Int("ttl", 1, "TTL值 (1=自动)")
@@ -243,4 +258,45 @@ func displayRecords(records []DNSRecord) {
 		fmt.Printf("%-36s %-20s %-15s %-8s %-50s %-6s %-8s\n",
 			record.ID, record.ZoneName, record.Name, record.Type, content, ttlStr, proxiedStr)
 	}
+}
+
+// 写入CSV文件
+func writeRecordsToCSV(records []DNSRecord, filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	headers := []string{"记录ID", "域名", "记录名", "类型", "内容", "TTL", "代理"}
+	if err := writer.Write(headers); err != nil {
+		return err
+	}
+
+	for _, record := range records {
+		proxiedStr := "否"
+		if record.Proxied {
+			proxiedStr = "是"
+		}
+		ttlStr := strconv.Itoa(record.TTL)
+		if record.TTL == 1 {
+			ttlStr = "自动"
+		}
+		row := []string{
+			record.ID,
+			record.ZoneName,
+			record.Name,
+			record.Type,
+			record.Content,
+			ttlStr,
+			proxiedStr,
+		}
+		if err := writer.Write(row); err != nil {
+			return err
+		}
+	}
+	return nil
 } 
