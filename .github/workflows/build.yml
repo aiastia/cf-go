@@ -65,7 +65,7 @@ jobs:
         fi
         
         go build -ldflags="-s -w -X main.Version=${{ env.VERSION }} -X main.BuildTime=${{ env.TIMESTAMP }} -X main.GitCommit=${{ env.COMMIT }}" \
-                 -trimpath -o $output_name main.go
+                 -trimpath -o $output_name
         
         echo "Built $output_name"
     
